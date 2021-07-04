@@ -1,4 +1,4 @@
-# A Docker swarm backup scripts.
+# Docker swarm backup scripts.
 These scripts backs up named volumes using Restic and a S3-compatible service.
 
 # Example use:
