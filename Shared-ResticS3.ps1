@@ -19,7 +19,7 @@ Function FormatS3BucketName([string]$name) {
     if ($bucketName.length -gt 63) {
         throw "Generated bucket name is longer than 63 character"
     }
-    return $bucketName
+    $bucketName
 }
 
 Class ItemsById : System.Collections.Hashtable {
