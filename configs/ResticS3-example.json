@@ -1,0 +1,8 @@
+{
+    "ServerUrl": "https://my-minio.host:9000",
+    "AccessKey": "my-access-key",
+    "SecretKey": "my-secret-key",
+    "ResticRepoPassword": "my-encryption-password",
+    "ResticPath": "./restic",
+    "ResticCaCertFileName": "RootCA-example.pem"
+}

@@ -1,0 +1,81 @@
+#requires -Version 7
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$ServiceId,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$MountSource,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$AccessKey,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$SecretKey,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$ServerUrl,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$ResticPath,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$ResticCaCertFileName,
+
+    # ToDo: Secure password value
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$ResticRepoPassword
+)
+
+begin {
+    Set-StrictMode -Version Latest
+    $InformationPreference = 'Continue'
+    Write-Information "+ Starting backup."
+
+    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    $MountItemsById = [ItemsById]::new()
+}
+
+process {
+    $mountItem = [ResticDockerCmdArgs]::new(
+        $MountSource,
+        $AccessKey,
+        $SecretKey,
+        $ServerUrl,
+        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticCaCertFileName,
+        $ResticRepoPassword
+    )
+    $MountItemsById.Add($ServiceId, $mountItem)
+}
+
+end {
+    foreach ($id in $MountItemsById.Keys) {
+        [PSCustomObject]$service = & docker @('service', 'inspect', $id) | ConvertFrom-Json
+        [int]$replicaCount = $service.Spec.Mode.Replicated.Replicas
+
+        Write-Information "--- Processing service $($service.Spec.Name)."
+        try {
+            if ($replicaCount -gt 0) {
+                & docker @('service', 'scale', "$id=0")
+            }
+
+            [ResticDockerCmdArgs[]]$mountItems = $MountItemsById[$id]
+
+            foreach ($mountItem in $mountItems) {
+                [string]$mountName = $mountItem.MountSource
+                [string]$bucketName = FormatS3BucketName($mountName)
+                Write-Information "Backing up volume $mountName to S3 bucket $bucketName"
+
+                $backupArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
+                    'backup', '--host', $mountName, "/$bucketName"
+                ))
+                & docker $backupArgs
+            }
+        } finally {
+            if ($replicaCount -gt 0) {
+                & docker @('service', 'scale', "$id=$replicaCount")
+            }
+        }
+    }
+}
