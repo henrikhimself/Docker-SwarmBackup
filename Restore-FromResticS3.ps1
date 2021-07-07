@@ -11,7 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+    Restore a snapshot from Restic into a volume.
+    .DESCRIPTION
+    .PARAMETER ServiceId
+    .PARAMETER MountSource
+    .PARAMETER AccessKey
+    .PARAMETER SecretKey
+    .PARAMETER ServerUrl
+    .PARAMETER ResticPath
+    .PARAMETER ResticCaCertFileName
+    .PARAMETER ResticRepoPassword
+    .PARAMETER ResticSnapshotId
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(

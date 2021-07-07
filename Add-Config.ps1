@@ -11,7 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+	Merges configuration from a file with the pipeline item.
+    .DESCRIPTION
+    This script will read in a configuration file and add properties from
+    it onto the pipeline item before returning it.
+    .PARAMETER MountDetail
+    The item onto which the configuration is added.
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(

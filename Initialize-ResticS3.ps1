@@ -11,7 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+    Initialize a S3 bucket for storing the Restic repository.
+    .DESCRIPTION
+    .PARAMETER ServiceId
+    .PARAMETER MountSource
+    .PARAMETER AccessKey
+    .PARAMETER SecretKey
+    .PARAMETER ServerUrl
+    .PARAMETER ResticPath
+    .PARAMETER ResticCaCertFileName
+    .PARAMETER ResticRepoPassword
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(

@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+	Retrieves volume details from Docker.
+    .DESCRIPTION
+    This script will query Docker and return a list of volume details.
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(
