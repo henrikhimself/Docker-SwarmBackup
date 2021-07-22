@@ -58,7 +58,7 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Starting backup."
 
-    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
     $MountItemsById = [ItemsById]::new()
 }
 
@@ -68,7 +68,7 @@ process {
         $AccessKey,
         $SecretKey,
         $ServerUrl,
-        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticPath,
         $ResticCaCertFileName,
         $ResticRepoPassword
     )

@@ -58,7 +58,7 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Listing Restic snapshots."
 
-    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
 }
 
 process {
@@ -67,7 +67,7 @@ process {
         $AccessKey,
         $SecretKey,
         $ServerUrl,
-        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticPath,
         $ResticCaCertFileName,
         $ResticRepoPassword
     )
@@ -78,7 +78,7 @@ process {
     [string[]]$snapshotArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
         'snapshots', '--host', $mountName
     ))
-    & docker $snapshotArgs 2>$null
+    & docker $snapshotArgs
 }
 
 end {

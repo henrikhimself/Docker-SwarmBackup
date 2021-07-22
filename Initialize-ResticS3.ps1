@@ -58,7 +58,7 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Ensuring S3 buckets exists."
 
-    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
 }
 
 process {
@@ -67,7 +67,7 @@ process {
         $AccessKey,
         $SecretKey,
         $ServerUrl,
-        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticPath,
         $ResticCaCertFileName,
         $ResticRepoPassword
     )

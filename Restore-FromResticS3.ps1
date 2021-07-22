@@ -50,11 +50,11 @@ param(
     [string]$ResticCaCertFileName,
 
     # ToDo: Secure password value
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
     [string]$ResticRepoPassword,
 
-    [Parameter(Mandatory = $true)]
-    [string]$ResticSnapshotId
+    [Parameter(Mandatory = $false)]
+    [string]$ResticSnapshotId = 'a45df5d1'
 )
 
 begin {
@@ -62,7 +62,7 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Starting restore."
 
-    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
     $MountItemsById = [ItemsById]::new()
 }
 
@@ -72,7 +72,7 @@ process {
         $AccessKey,
         $SecretKey,
         $ServerUrl,
-        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticPath,
         $ResticCaCertFileName,
         $ResticRepoPassword
     )
@@ -99,23 +99,7 @@ end {
                 [string]$bucketName = FormatS3BucketName($mountName)
                 Write-Information "Restoring volume $mountName from S3 bucket $bucketName"
                 
-                # ToDo: Use pwsh container instead to return structure data that counts easier
-                
-                [string[]]$contentCheckArgs = $PwshDockerCmdArgs.CreatePwshDockerCmdArgs($mountName, $bucketName, @(
-                    'Get-ChildItem', "/$bucketName"
-                ))
-                [string[]]$contentCheck = & docker $contentCheckArgs
-                Write-Host $contentCheck
-                if ($contentCheck.Length -gt 0) {
-                    Write-Host "Destination volume already contains data. Aborting..."
-                    exit 1
-                }
-
-                
-                # restore content from S3 into volume
-
-
-
+                # ToDo: Restore content from S3 into volume
                 
             }
         } finally {
