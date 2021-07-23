@@ -54,7 +54,7 @@ param(
     [string]$ResticRepoPassword,
 
     [Parameter(Mandatory = $false)]
-    [string]$ResticSnapshotId = 'a45df5d1'
+    [string]$ResticSnapshotId = 'latest'
 )
 
 begin {
@@ -80,17 +80,15 @@ process {
 }
 
 end {
-    $PwshDockerCmdArgs = [PwshDockerCmdArgs]::new()
-
     foreach ($id in $MountItemsById.Keys) {
         [PSCustomObject]$service = & docker @('service', 'inspect', $id) | ConvertFrom-Json
         [int]$replicaCount = $service.Spec.Mode.Replicated.Replicas
 
         Write-Information "--- Processing service $($service.Spec.Name)."
         try {
-            # if ($replicaCount -gt 0) {
-            #     & docker @('service', 'scale', "$id=0")
-            # }
+            if ($replicaCount -gt 0) {
+                & docker @('service', 'scale', "$id=0")
+            }
 
             [ResticDockerCmdArgs[]]$mountItems = $MountItemsById[$id]
 
@@ -99,13 +97,16 @@ end {
                 [string]$bucketName = FormatS3BucketName($mountName)
                 Write-Information "Restoring volume $mountName from S3 bucket $bucketName"
                 
-                # ToDo: Restore content from S3 into volume
-                
+                $restoreArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
+                    'restore', $ResticSnapshotId, '--target', '/', 
+                    '--host', $mountName
+                ))
+                & docker $restoreArgs
             }
         } finally {
-            # if ($replicaCount -gt 0) {
-            #     & docker service scale $("$id=$replicaCount")
-            # }
+            if ($replicaCount -gt 0) {
+                & docker @('service', 'scale', "$id=$replicaCount")
+            }
         }
     }
 }
