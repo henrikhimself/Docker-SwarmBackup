@@ -3,6 +3,5 @@
     "AccessKey": "my-access-key",
     "SecretKey": "my-secret-key",
     "ResticRepoPassword": "my-encryption-password",
-    "ResticPath": "./restic",
     "ResticCaCertFileName": "RootCA-example.pem"
 }

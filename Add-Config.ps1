@@ -11,12 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+	Merges configuration from a file with the pipeline item.
+    .DESCRIPTION
+    This script will read in a configuration file and add properties from
+    it onto the pipeline item before returning it.
+    .PARAMETER MountDetail
+    The item onto which the configuration is added.
+    .PARAMETER ConfigFilePath
+    Filepath of the configuration file to use.
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
-    [object]$MountDetail
+    [object]$MountDetail,
+
+    [Parameter(Mandatory = $false, ValueFromPipeline = $false)]
+    [string]$ConfigFilePath = (Join-Path $PSScriptRoot 'restic-example' | Join-Path -ChildPath 'Config.json')
 )
 
 begin {
@@ -24,23 +37,24 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Adding configuration."
 
-    [string]$configPath = Join-Path $PSScriptRoot 'configs/ResticS3.json'
-    Write-Verbose "Reading configuration from $configPath"
+    Write-Verbose "Reading configuration from $ConfigFilePath"
     [PSCustomObject]$Config = $null
-    if (Test-Path -Path $configPath -PathType Leaf) {
-        $Config = Get-Content -Path $configPath | ConvertFrom-Json
+    if (Test-Path -Path $ConfigFilePath -PathType Leaf) {
+        $Config = Get-Content -Path $ConfigFilePath | ConvertFrom-Json
     }
  }
 
  process {
     $mountDetailWithConfig = @{}
 
+    # Add detail received in pipeline
     foreach ($property in $MountDetail.PSObject.Properties) {
         [string]$propertyName = $property.Name
         $propertyValue = $property.Value
         $mountDetailWithConfig[$propertyName] = $propertyValue
     }
     
+    # Merge in detail read from config file
     if ($Config) {
         foreach ($property in $Config.PSObject.Properties) {
             [string]$propertyName = $property.Name
@@ -49,6 +63,16 @@ begin {
         }
     }
 
+    # Add magic defaults
+    [string]$resticPath = $mountDetailWithConfig['ResticPath']
+    if (!$resticPath) {
+        $resticPath = $ConfigFilePath
+    }
+    if (!$resticPath.EndsWith([IO.Path]::PathSeparator)) {
+        $resticPath = Split-Path -Path $resticPath
+    }
+    $mountDetailWithConfig['ResticPath'] = Resolve-Path -Path $resticPath
+    
     [PSCustomObject]$mountDetailWithConfig
 }
 

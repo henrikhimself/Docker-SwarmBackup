@@ -13,7 +13,7 @@
 # limitations under the License.
 <#  
     .SYNOPSIS
-    Backup a volume to a Restic repository.
+    Restore a snapshot from Restic into a volume.
     .DESCRIPTION
     .PARAMETER ServiceId
     .PARAMETER MountSource
@@ -23,6 +23,7 @@
     .PARAMETER ResticPath
     .PARAMETER ResticCaCertFileName
     .PARAMETER ResticRepoPassword
+    .PARAMETER ResticSnapshotId
 #>
 #requires -Version 7
 [CmdletBinding()]
@@ -49,14 +50,17 @@ param(
     [string]$ResticCaCertFileName,
 
     # ToDo: Secure password value
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-    [string]$ResticRepoPassword
+    [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+    [string]$ResticRepoPassword,
+
+    [Parameter(Mandatory = $false)]
+    [string]$ResticSnapshotId = 'latest'
 )
 
 begin {
     Set-StrictMode -Version Latest
     $InformationPreference = 'Continue'
-    Write-Information "+ Starting backup."
+    Write-Information "+ Starting restore."
 
     . (Join-Path $PSScriptRoot 'Shared.ps1')
     $MountItemsById = [ItemsById]::new()
@@ -91,12 +95,13 @@ end {
             foreach ($mountItem in $mountItems) {
                 [string]$mountName = $mountItem.MountSource
                 [string]$bucketName = FormatS3BucketName($mountName)
-                Write-Information "Backing up volume $mountName to S3 bucket $bucketName"
-
-                $backupArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
-                    'backup', '--host', $mountName, "/$bucketName"
+                Write-Information "Restoring volume $mountName from S3 bucket $bucketName"
+                
+                $restoreArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
+                    'restore', $ResticSnapshotId, '--target', '/', 
+                    '--host', $mountName
                 ))
-                & docker $backupArgs
+                & docker $restoreArgs
             }
         } finally {
             if ($replicaCount -gt 0) {

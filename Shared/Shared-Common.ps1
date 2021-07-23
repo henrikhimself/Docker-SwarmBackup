@@ -11,30 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<#  
-    .SYNOPSIS
-	Retrieves service ids from Docker.
-    .DESCRIPTION
-    This script will query Docker and return a list of service ids.
-#>
+
 #requires -Version 7
-[CmdletBinding()]
-param(
-)
 
-begin {
-    Set-StrictMode -Version Latest
-    $InformationPreference = 'Continue'
-
-    Write-Information "+ Getting service ids."
-    [string[]]$IdList = & docker @('service', 'ls', '--format', '{{.ID}}')
-}
-
-process {
-    foreach ($id in $IdList) {
-        $id
+Function FormatS3BucketName([string]$name) {
+    [string]$bucketName = $name.ToLower().PadRight(3, '-') -replace('/', '.') -replace('_', '-') -replace '[^a-z0-9\.-]'
+    if ($bucketName.length -gt 63) {
+        throw "Generated bucket name is longer than 63 character"
     }
+    $bucketName
 }
 
-end {
+Function StripAnsiCharacters([string]$text) {
+    [string]$newText = $text -replace '^.*\[\?.*='
+    $newText
+}
+
+Class ItemsById : System.Collections.Hashtable {
+    [void] Add([string]$id, $data) {
+        if (!$this.ContainsKey($id)) {
+            $this[$id] = @()
+        }
+        $this[$id] += @( $data )
+    }
 }

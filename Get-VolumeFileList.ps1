@@ -13,27 +13,39 @@
 # limitations under the License.
 <#  
     .SYNOPSIS
-	Retrieves service ids from Docker.
+    Retrieves file list from a volume.
     .DESCRIPTION
-    This script will query Docker and return a list of service ids.
+
+    .PARAMETER MountDetail
 #>
 #requires -Version 7
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [object]$MountDetail
 )
 
 begin {
     Set-StrictMode -Version Latest
     $InformationPreference = 'Continue'
+    Write-Information "+ Retrieving volume file list."
 
-    Write-Information "+ Getting service ids."
-    [string[]]$IdList = & docker @('service', 'ls', '--format', '{{.ID}}')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
 }
 
 process {
-    foreach ($id in $IdList) {
-        $id
-    }
+    $PwshDockerCmdArgs = [PwshDockerCmdArgs]::new()
+
+    [string]$mountName = $MountDetail.MountSource
+    [string[]]$dockerArgs = $PwshDockerCmdArgs.CreatePwshDockerCmdArgs($mountName, 'volumeData', @(
+        'pwsh', '-Command', 'Get-ChildItem', '-Path', '/volumeData', '|', 'ConvertTo-Json'
+    ))
+
+    [string]$dockerOutput = & docker $dockerArgs
+    $dockerOutput = StripAnsiCharacters($dockerOutput)
+    
+    [PSCustomObject]$fileList = $dockerOutput | ConvertFrom-Json
+    $fileList
 }
 
 end {

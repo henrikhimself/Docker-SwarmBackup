@@ -11,7 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+<#  
+    .SYNOPSIS
+    Initialize a S3 bucket for storing the Restic repository.
+    .DESCRIPTION
+    .PARAMETER ServiceId
+    .PARAMETER MountSource
+    .PARAMETER AccessKey
+    .PARAMETER SecretKey
+    .PARAMETER ServerUrl
+    .PARAMETER ResticPath
+    .PARAMETER ResticCaCertFileName
+    .PARAMETER ResticRepoPassword
+#>
 #requires -Version 7
 [CmdletBinding()]
 param(
@@ -46,7 +58,7 @@ begin {
     $InformationPreference = 'Continue'
     Write-Information "+ Ensuring S3 buckets exists."
 
-    . (Join-Path $PSScriptRoot 'Shared-ResticS3.ps1')
+    . (Join-Path $PSScriptRoot 'Shared.ps1')
 }
 
 process {
@@ -55,7 +67,7 @@ process {
         $AccessKey,
         $SecretKey,
         $ServerUrl,
-        $(Join-Path $PSScriptRoot $ResticPath -Resolve),
+        $ResticPath,
         $ResticCaCertFileName,
         $ResticRepoPassword
     )
