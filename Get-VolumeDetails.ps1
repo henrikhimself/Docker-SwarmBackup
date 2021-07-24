@@ -33,17 +33,24 @@ begin {
 process {
     [PSCustomObject]$service = & docker @('service', 'inspect', $ServiceId) | ConvertFrom-Json
 
-    [PSCustomObject[]]$mounts = $service.Spec.TaskTemplate.ContainerSpec.Mounts
-    foreach ($mount in $mounts) {
-        if ($mount.Type -eq 'volume') {
-            $mountDetail = [PSCustomObject]@{
-                ServiceId = $service.ID
-                MountType = $mount.Type
-                MountSource = $mount.Source
-                MountTarget = $mount.Target
+    [PSCustomObject[]]$mounts = $null
+    try {
+        $mounts = $service.Spec.TaskTemplate.ContainerSpec.Mounts
+    }
+    catch {}
+    
+    if ($mounts) {
+        foreach ($mount in $mounts) {
+            if ($mount.Type -eq 'volume') {
+                $mountDetail = [PSCustomObject]@{
+                    ServiceId = $service.ID
+                    MountType = $mount.Type
+                    MountSource = $mount.Source
+                    MountTarget = $mount.Target
+                }
+                $mountDetail
             }
-            $mountDetail
-        }
+        }    
     }
 }
 
