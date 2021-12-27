@@ -24,6 +24,7 @@
     .PARAMETER ResticCaCertFileName
     .PARAMETER ResticRepoPassword
     .PARAMETER ResticSnapshotId
+    .PARAMETER BucketNamePrefix
 #>
 #requires -Version 7
 [CmdletBinding()]
