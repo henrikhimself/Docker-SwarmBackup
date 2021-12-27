@@ -3,5 +3,6 @@
     "AccessKey": "my-access-key",
     "SecretKey": "my-secret-key",
     "ResticRepoPassword": "my-encryption-password",
-    "ResticCaCertFileName": "RootCA-example.pem"
+    "ResticCaCertFileName": "RootCA-example.pem",
+    "BucketNamePrefix": "my-"
 }

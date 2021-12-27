@@ -50,7 +50,10 @@ param(
 
     # ToDo: Secure password value
     [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-    [string]$ResticRepoPassword
+    [string]$ResticRepoPassword,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$BucketNamePrefix
 )
 
 begin {
@@ -90,7 +93,7 @@ end {
 
             foreach ($mountItem in $mountItems) {
                 [string]$mountName = $mountItem.MountSource
-                [string]$bucketName = FormatS3BucketName($mountName)
+                [string]$bucketName = FormatS3BucketName($BucketNamePrefix + $mountName)
                 Write-Information "Backing up volume $mountName to S3 bucket $bucketName"
 
                 $backupArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(

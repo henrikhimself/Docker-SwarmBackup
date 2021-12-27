@@ -50,7 +50,10 @@ param(
 
     # ToDo: Secure password value
     [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
-    [string]$ResticRepoPassword
+    [string]$ResticRepoPassword,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$BucketNamePrefix
 )
 
 begin {
@@ -73,7 +76,7 @@ process {
     )
     
     [string]$mountName = $mountItem.MountSource
-    [string]$bucketName = FormatS3BucketName($mountName)
+    [string]$bucketName = FormatS3BucketName($BucketNamePrefix + $mountName)
 
     [string[]]$snapshotArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
         'snapshots', '--host', $mountName
