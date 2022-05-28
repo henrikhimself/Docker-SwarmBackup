@@ -3,7 +3,7 @@ This repository contains Powershell scripts for backing up named volumes belongi
 
 The Powershell scripts relies on pipelining multiple scripts together to complete an operation e.g. creating or restoring a backup. Below, there are examples for backing up all named volumes in a Docker Swarm by using the ./Get-ServiceIds.ps1 script to supply the pipeline with service ids. The final script in the pipeline uses Restic and S3 to e.g. initialize buckets, backup/restore backup snapshots and finally display created snapshots. 
 
-Backup configuration is provided using a JSON file (see the 'restic-example' folder). The path of a config file can be provided to the Add-Config script to set a S3 server url and credentials, a restic repository password, root CA for trusting a self-signed certificate and a bucket prefix (bucket names are generated using the name of named volume).
+Backup configuration is provided using a JSON file (see the 'restic-example' folder). The path of a config file can be given when invoking the Add-Config.ps1 script to set the S3 server url and credentials, a restic repository password, root CA for trusting self-signed certificates and a bucket prefix (bucket names are generated using the names of named volumes).
 
 I use these scripts in my homelab only. They have been tested with a Docker Swarm running 10-15 services with NFS named volumes. I use [Minio](https://min.io/) for my S3 compatible storage.
 
