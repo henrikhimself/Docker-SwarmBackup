@@ -24,6 +24,7 @@
     .PARAMETER ResticCaCertFileName
     .PARAMETER ResticRepoPassword
     .PARAMETER ResticSnapshotId
+    .PARAMETER BucketNamePrefix
 #>
 #requires -Version 7
 [CmdletBinding()]
@@ -52,6 +53,9 @@ param(
     # ToDo: Secure password value
     [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
     [string]$ResticRepoPassword,
+
+    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+    [string]$BucketNamePrefix,
 
     [Parameter(Mandatory = $false)]
     [string]$ResticSnapshotId = 'latest'
@@ -94,7 +98,7 @@ end {
 
             foreach ($mountItem in $mountItems) {
                 [string]$mountName = $mountItem.MountSource
-                [string]$bucketName = FormatS3BucketName($mountName)
+                [string]$bucketName = FormatS3BucketName($BucketNamePrefix + $mountName)
                 Write-Information "Restoring volume $mountName from S3 bucket $bucketName"
                 
                 $restoreArgs = $mountItem.CreateResticDockerCmdArgs($bucketName, @(
